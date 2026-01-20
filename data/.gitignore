@@ -1,0 +1,9 @@
+*.zip
+*.json
+*.jpg
+*.png
+*.gif
+*.log
+*.sqlite
+
+!*.gitignore

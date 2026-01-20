@@ -1,0 +1,26 @@
+# Git and VCS
+.git
+.gitignore
+
+# Python caches and virtual envs
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.venv/
+venv/
+
+# Data and outputs (mounted locally when needed)
+data/
+outputs/
+
+# Notebooks and experiments (not needed in image)
+notebooks/
+experiments/
+
+# DVC caches
+.dvc/
+.cache/
+
+# VS Code
+.vscode/

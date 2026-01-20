@@ -1,0 +1,35 @@
+[tool.poetry]
+name = "financial-news-correlation-analysis"
+version = "0.1.0"
+description = "Financial News Sentiment Analysis Challenge"
+authors = ["ABEL BEKELE abelbeorking245@gmail.com"]
+readme = "README.md"
+packages = [{include = "customer_analytics", from = "src"}]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+pandas = "*"
+numpy = "*"
+scikit-learn = "*"
+matplotlib = "*"
+seaborn = "*"
+textblob = "*"
+pydantic = "*"
+pydantic-settings = "*"
+pyyaml = "*"
+joblib = "*"
+
+talib = "*"
+yfinance = "*"
+pynance = "*"
+quantstats = "*"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "*"
+black = "*"
+isort = "*"
+flake8 = "*"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

@@ -1,0 +1,8 @@
+stages:
+  prepare_data:
+    cmd: .\.venv\\Scripts\\python scripts/prepare_insurance_data.py
+    deps:
+    - data/raw/MachineLearningRating_v3.txt
+    - scripts/prepare_insurance_data.py
+    outs:
+    - data/processed/insurance_clean.csv
