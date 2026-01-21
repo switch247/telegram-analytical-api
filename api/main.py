@@ -1,7 +1,11 @@
 import pandas as pd
 import mlflow.sklearn
 import joblib
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Query
+from sqlalchemy import text
+from .database import engine
+from .schemas import TopProduct, ChannelActivity, MessageSearchResult, VisualContentStats
+from typing import List
 from src.api.pydantic_models import TransactionInput, PredictionOutput
 import sys
 from pathlib import Path
@@ -74,3 +78,80 @@ def predict(transaction: TransactionInput):
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Prediction error: {e}")
+
+
+@app.get("/api/reports/top-products", response_model=List[TopProduct])
+def get_top_products(limit: int = 10):
+    with engine.connect() as conn:
+        result = conn.execute(text("""
+            SELECT word AS product, COUNT(*) AS count
+            FROM (
+                SELECT unnest(string_to_array(lower(message_text), ' ')) AS word
+                FROM medical_warehouse.marts.core.fct_messages
+            ) sub
+            WHERE word ~ '^[a-zA-Z]+'
+            GROUP BY word
+            ORDER BY count DESC
+            LIMIT :limit
+        """), {"limit": limit})
+        return [TopProduct(product=row[0], count=row[1]) for row in result]
+
+
+@app.get("/api/channels/{channel_name}/activity", response_model=ChannelActivity)
+def get_channel_activity(channel_name: str):
+    with engine.connect() as conn:
+        result = conn.execute(text("""
+            SELECT channel_name, total_posts, avg_views, first_post_date, last_post_date
+            FROM medical_warehouse.marts.core.dim_channels
+            WHERE channel_name = :channel_name
+        """), {"channel_name": channel_name}).fetchone()
+        if not result:
+            raise HTTPException(status_code=404, detail="Channel not found")
+        return ChannelActivity(
+            channel_name=result[0],
+            total_posts=result[1],
+            avg_views=result[2],
+            first_post_date=str(result[3]),
+            last_post_date=str(result[4])
+        )
+
+
+@app.get("/api/search/messages", response_model=List[MessageSearchResult])
+def search_messages(query: str, limit: int = 20):
+    with engine.connect() as conn:
+        result = conn.execute(text("""
+            SELECT message_id, channel_name, message_text, post_date, view_count, forward_count, has_image
+            FROM medical_warehouse.marts.core.fct_messages
+            WHERE message_text ILIKE :query
+            LIMIT :limit
+        """), {"query": f'%{query}%', "limit": limit})
+        return [MessageSearchResult(
+            message_id=row[0],
+            channel_name=row[1],
+            message_text=row[2],
+            post_date=str(row[3]),
+            view_count=row[4],
+            forward_count=row[5],
+            has_image=row[6]
+        ) for row in result]
+
+
+@app.get("/api/reports/visual-content", response_model=List[VisualContentStats])
+def get_visual_content_stats():
+    with engine.connect() as conn:
+        result = conn.execute(text("""
+            SELECT channel_name,
+                SUM(CASE WHEN image_category = 'promotional' THEN 1 ELSE 0 END) AS promotional_count,
+                SUM(CASE WHEN image_category = 'product_display' THEN 1 ELSE 0 END) AS product_display_count,
+                SUM(CASE WHEN image_category = 'lifestyle' THEN 1 ELSE 0 END) AS lifestyle_count,
+                SUM(CASE WHEN image_category = 'other' THEN 1 ELSE 0 END) AS other_count
+            FROM processed.yolo_detections
+            GROUP BY channel_name
+        """))
+        return [VisualContentStats(
+            channel_name=row[0],
+            promotional_count=row[1],
+            product_display_count=row[2],
+            lifestyle_count=row[3],
+            other_count=row[4]
+        ) for row in result]

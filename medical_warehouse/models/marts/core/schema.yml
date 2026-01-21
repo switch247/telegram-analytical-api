@@ -85,3 +85,29 @@ models:
         description: "Number of forwards."
       - name: has_image
         description: "True if message has image."
+
+  - name: fct_image_detections
+    description: "Fact table for YOLO image detections joined to messages."
+    columns:
+      - name: message_id
+        description: "Unique message ID."
+        tests:
+          - not_null
+      - name: channel_key
+        description: "Foreign key to dim_channels."
+        tests:
+          - relationships:
+              to: ref('dim_channels')
+              field: channel_key
+      - name: date_key
+        description: "Foreign key to dim_dates."
+        tests:
+          - relationships:
+              to: ref('dim_dates')
+              field: date_key
+      - name: detected_class
+        description: "Class detected by YOLO (e.g., person, bottle)."
+      - name: confidence_score
+        description: "YOLO confidence score for detected class."
+      - name: image_category
+        description: "Image category (promotional, product_display, lifestyle, other)."
