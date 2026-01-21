@@ -64,23 +64,25 @@ models:
       - name: channel_key
         description: "Foreign key to dim_channels."
         tests:
+          - not_null
           - relationships:
               to: ref('dim_channels')
               field: channel_key
       - name: date_key
         description: "Foreign key to dim_dates."
         tests:
+          - not_null
           - relationships:
               to: ref('dim_dates')
               field: date_key
       - name: message_text
         description: "Text of the message."
+        tests:
+          - not_null
       - name: message_length
         description: "Length of the message text."
       - name: view_count
         description: "Number of views."
-        tests:
-          - not_null
       - name: forward_count
         description: "Number of forwards."
       - name: has_image
