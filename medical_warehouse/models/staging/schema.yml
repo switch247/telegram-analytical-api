@@ -1,0 +1,35 @@
+version: 2
+
+models:
+  - name: stg_telegram_messages
+    description: "Staging model for raw Telegram messages. Cleans, casts, and adds calculated fields."
+    columns:
+      - name: message_id
+        description: "Unique message ID."
+        tests:
+          - unique
+          - not_null
+      - name: channel_name
+        description: "Name of the Telegram channel."
+        tests:
+          - not_null
+      - name: channel_type
+        description: "Type of channel (Pharmaceutical, Cosmetics, Medical)."
+      - name: message_text
+        description: "Text of the message."
+        tests:
+          - not_null
+      - name: post_date
+        description: "Timestamp of the message."
+        tests:
+          - not_null
+      - name: view_count
+        description: "Number of views."
+      - name: forward_count
+        description: "Number of forwards."
+      - name: image_url
+        description: "URL of the image if present."
+      - name: message_length
+        description: "Length of the message text."
+      - name: has_image
+        description: "True if message has image."
