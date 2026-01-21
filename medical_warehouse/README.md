@@ -40,5 +40,25 @@ This design enables efficient analysis of trends, channel activity, and content 
 - See the [project report](../experiments/todo.md) for business context, requirements, and schema diagrams.
 - dbt auto-generates detailed documentation for all models and tests.
 
+# Image Detection Integration
+
+This dbt model and pipeline integrates YOLOv8 object detection results with Telegram message analytics. It enables analysis of visual content patterns, such as:
+- Do promotional posts (with people) get more views than product_display posts?
+- Which channels use more visual content?
+- What are the limitations of using pre-trained models for domain-specific tasks?
+
+**Pipeline Steps:**
+1. YOLOv8 runs on all images scraped from Telegram channels.
+2. Detected objects and confidence scores are saved to CSV and loaded into PostgreSQL.
+3. dbt model `fct_image_detections` joins detection results to message facts for analysis.
+
+**Image Categories:**
+- promotional: person + product
+- product_display: bottle/container, no person
+- lifestyle: person, no product
+- other: neither detected
+
+This enables rich, visual analytics for medical business channels in Ethiopia.
+
 ---
 For more, see the main project README and the challenge document in `experiments/todo.md`.
